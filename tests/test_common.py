@@ -1,4 +1,5 @@
 import pytest
+from nose_parameterized import parameterized
 
 from testdimensions import (all_same,
                             is_blank,
@@ -10,8 +11,7 @@ from testdimensions import (all_same,
                             iterate_table_cells)
 
 
-@pytest.mark.parametrize(
-    'lines,position,character,expect',
+@parameterized(
     [([], 0, 'x', True),
      (['a|b', 'b|c'], 0, '|', False),
      (['a|b', 'b|c'], 1, '|', True),
@@ -26,8 +26,7 @@ def test_all_same(lines, position, character, expect):
         assert result == expect
 
 
-@pytest.mark.parametrize(
-    's,expect',
+@parameterized(
     [('', True),
      (' ', True),
      ('\t', True),
@@ -38,8 +37,7 @@ def test_is_blank(s, expect):
     assert result == expect
 
 
-@pytest.mark.parametrize(
-    's,expect',
+@parameterized(
     [('', False),
      (' ', False),
      ('\t', False),
@@ -50,8 +48,7 @@ def test_not_blank(s, expect):
     assert result == expect
 
 
-@pytest.mark.parametrize(
-    'content,expect',
+@parameterized(
     [('', []),
      ('foobar', [['foobar']]),
      ('\nfoobar', [['foobar']]),
@@ -65,8 +62,7 @@ def test_split_by_blank_lines(content, expect):
     assert result == expect
 
 
-@pytest.mark.parametrize(
-    'lines,sep,expect',
+@parameterized(
     [([''], r'\|', False),
      (['col1 | col2',
        'a | b  '], r'\|', False),
@@ -79,8 +75,7 @@ def test_is_table(lines, sep, expect):
     assert result == expect
 
 
-@pytest.mark.parametrize(
-    'line,starts,ends,expect',
+@parameterized(
     [('', [], [], []),
      ('abcde', [], [], []),
      ('', [5], [10], ['']),
@@ -91,8 +86,7 @@ def test_pick_columns(line, starts, ends, expect):
     assert result == expect
 
 
-@pytest.mark.parametrize(
-    'lines,sep,expect',
+@parameterized(
     [([], 'x', []),
      ([' | '], r'\|', [['', '']]),
      ([' | col1 | col2'], r'\|', [['', 'col1', 'col2']]),
@@ -115,8 +109,7 @@ def test_parse_table(lines, sep, expect):
     assert result == expect
 
 
-@pytest.mark.parametrize(
-    'table,expect',
+@parameterized(
     [([], []),
      ([['', 'col1', 'col2']], []),
      ([['', 'col1', 'col2'],

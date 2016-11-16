@@ -5,4 +5,4 @@ setup(name='testdimensions',
       version='0.0.1.dev',
       license='FreeBSD',
       py_modules=['testdimensions'],
-      tests_require=['pytest-mock>=1.2'])
+      tests_require=['pytest-mock>=1.2', 'mock>=2.0.0'])
