@@ -9,8 +9,6 @@ some support these days, Nose allows yielding test cases, Pytest has built-in
 parameterization support, and the excellent nose_parameterized_ package enhances
 these capabilities in most test frameworks.
 
-.. _nose_parameterized: https://pypi.org/project/nose-parameterized/
-
 ``testdimensions`` provides a convenient way to write multi-dimensional test
 matrices in some simple scenarios. If your function accepts multiple arguments
 and you want to test a cross product set of parameter combinations,
@@ -50,7 +48,7 @@ Specify your tests as a table whose:
    def test_round_floor_ceil(input, function, expected):
        assert function(input) == expected
 
-With Pytest::
+Output::
 
     $ pytest -v
     =========================== test session starts ===============================
@@ -102,10 +100,10 @@ Compatibility
      - PyPy
    * - nose
      - no
+     - yes
      - no
      - no
-     - no
-     - not yet
+     - yes
      - no
    * - nose2
      - no
@@ -116,7 +114,7 @@ Compatibility
      - no
    * - py.test
      - not tested
-     - not tested
+     - yes
      - not tested
      - not tested
      - yes
@@ -139,7 +137,7 @@ Compatibility
 Dependencies
 ------------
 
-(this section left intentionally blank)
+- nose_parameterized_ for Nose support
 
 
 Exhaustive Usage Examples
@@ -193,3 +191,50 @@ interspersed with values for the additional parameters.
        million=1000000)
    def test_arithmetic_operations(operation, a, b, expected):
        assert operation(a, b) == expected
+
+For Nose support, you need to install nose_parameterized_ and use the
+``@nosedimensions`` decorator:
+
+.. code:: python
+
+   @nosedimensions('a,b,expected', '''
+               -10   0   9  million
+       -9      -19  -9   0   999991
+        0      -10   0   9  million
+       10        0  10  19  1000010
+       ''',
+       million=1000000)
+   def test_add(a, b, expected):
+       assert a + b == expected
+
+
+   @nosedimensions('operation,a,b,expected', '''
+       operation = operator.sub
+
+               -10   0    9   million
+       -9        1  -9  -18  -1000009
+        0       10   0   -9  -million
+       10       20  10    1   -999990
+
+       operation = operator.add
+
+               -10   0   9  million
+       -9      -19  -9   0   999991
+        0      -10   0   9  million
+       10        0  10  19  1000010
+
+       operation = operator.mul
+
+               -10   0    9   million
+       -9       90   0  -81  -9000000
+        0        0   0    0         0
+       10     -100   0   90  10000000
+
+       ''',
+       million=1000000)
+   def test_arithmetic_operations(operation, a, b, expected):
+       assert operation(a, b) == expected
+
+Note that you still need to enumerate the test parameters just like with Pytest.
+
+.. _nose_parameterized: https://pypi.org/project/nose-parameterized/
