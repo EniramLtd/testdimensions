@@ -11,5 +11,7 @@ env:
   - TOXENV=py35-pytest
   - TOXENV=pypy-nose
   - TOXENV=pypy-pytest
+  - TOXENV=pypy3-nose
+  - TOXENV=pypy3-pytest
 install: pip install tox
 script: tox
