@@ -6,7 +6,7 @@ except IOError:
     long_description = 'See https://github.com/akaihola/testdimensions'
 
 setup(name='testdimensions',
-      version='0.0.1.dev',
+      version='0.0.1',
       url='https://github.com/akaihola/testdimensions',
       license='FreeBSD',
       author='Antti Kaihola',
