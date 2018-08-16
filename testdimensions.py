@@ -68,31 +68,72 @@ def iterate_table_cells(table):
             yield row_title, column_title, cell
 
 
+def make_argnames_list(argnames):
+    if isinstance(argnames, (tuple, list)):
+        return argnames
+    else:
+        return [x.strip() for x in argnames.split(",") if x.strip()]
+
+
+def build_namespace(current_frame, namespace):
+    eval_namespace = current_frame.f_back.f_globals.copy()
+    eval_namespace.update(current_frame.f_back.f_locals)
+    eval_namespace.update(namespace)
+    return eval_namespace
+
+
+def parse_tables_as_call_parameters(tables, argnames, sep, namespace):
+    argvalues = []
+    for lines in split_by_blank_lines(dedent(tables)):
+        if is_table(lines, sep):
+            uncommented_lines = [line for line in lines
+                                 if not line.lstrip().startswith('#')]
+            parsed_table = parse_table(uncommented_lines, sep)
+            for row, col, cell in iterate_table_cells(parsed_table):
+                argvalues.append(
+                    tuple(namespace[argname] for argname in argnames[:-3]) +
+                    (eval(row, namespace),
+                     eval(col, namespace),
+                     eval(cell, namespace)))
+        else:
+            exec('\n'.join(lines), namespace)
+    return argvalues
+
+
 try:
     import pytest
 
-
-    def pytest_mark_dimensions(argnames, tables, sep='  ', **namespace):
+    def pytest_mark_dimensions(argnames, tables, sep='  ', **kwargs):
         # Get globals and locals from the calling scope
-        if not isinstance(argnames, (tuple, list)):
-            argnames = [x.strip() for x in argnames.split(",") if x.strip()]
-        eval_namespace = inspect.currentframe().f_back.f_globals.copy()
-        eval_namespace.update(inspect.currentframe().f_back.f_locals)
-        eval_namespace.update(namespace)
-        argvalues = []
-        for lines in split_by_blank_lines(dedent(tables)):
-            if is_table(lines, sep):
-                uncommented_lines = [line for line in lines
-                                     if not line.lstrip().startswith('#')]
-                parsed_table = parse_table(uncommented_lines, sep)
-                for row, col, cell in iterate_table_cells(parsed_table):
-                    argvalues.append(tuple(eval_namespace[argname]
-                                           for argname in argnames[:-3]) +
-                                     (eval(row, eval_namespace),
-                                      eval(col, eval_namespace),
-                                      eval(cell, eval_namespace)))
-            else:
-                exec('\n'.join(lines), eval_namespace)
+        argnames = make_argnames_list(argnames)
+        namespace = build_namespace(inspect.currentframe(), kwargs)
+        argvalues = parse_tables_as_call_parameters(tables, argnames, sep,
+                                                    namespace)
         return pytest.mark.parametrize(argnames, argvalues)
 except ImportError:
+    pass
+
+
+try:
+    from nose_parameterized import parameterized
+
+    class nosedimensions(parameterized):
+        def __init__(self, argnames, tables, sep='  ', **kwargs):
+            # Get globals and locals from the calling scope
+            argnames = make_argnames_list(argnames)
+            namespace = build_namespace(inspect.currentframe(), kwargs)
+            argvalues = parse_tables_as_call_parameters(tables, argnames, sep,
+                                                        namespace)
+            super(nosedimensions, self).__init__(argvalues)
+
+        @classmethod
+        def expand(cls, argnames, tables, sep='  ', **kwargs):
+            # Get globals and locals from the calling scope
+            argnames = make_argnames_list(argnames)
+            namespace = build_namespace(inspect.currentframe(), kwargs)
+            argvalues = parse_tables_as_call_parameters(tables, argnames, sep,
+                                                        namespace)
+            return super(nosedimensions, cls).expand(argvalues)
+except ImportError:
+    raise
     pass

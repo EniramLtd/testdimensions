@@ -1,0 +1,17 @@
+language: python
+sudo: false
+env:
+  - TOXENV=py27-nose
+  - TOXENV=py27-pytest
+  - TOXENV=py33-nose
+  - TOXENV=py33-pytest
+  - TOXENV=py34-nose
+  - TOXENV=py34-pytest
+  - TOXENV=py35-nose
+  - TOXENV=py35-pytest
+  - TOXENV=pypy-nose
+  - TOXENV=pypy-pytest
+  - TOXENV=pypy3-nose
+  - TOXENV=pypy3-pytest
+install: pip install tox
+script: tox

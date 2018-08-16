@@ -1,0 +1,5 @@
+0.0.1 (2016-11-16)
+    * Added a readme file
+    * Added the simplified BSD license
+    * Added Nose support
+    * Run tests in Travis CI
